@@ -17,6 +17,8 @@ object Migration {
                 when (version) {
                     0 -> driver.migrateToVersion1()
                     1 -> driver.migrateToVersion2()
+                    2, 3 -> {}
+                    4 -> driver.migrateToVersion5()
                     else -> throw NotImplementedError(version.toString())
                 }
             }

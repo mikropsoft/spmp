@@ -26,10 +26,17 @@ fun NowPlayingOverlappingWaveBackground(modifier: Modifier = Modifier) {
     val expansion: NowPlayingExpansionState = LocalNowPlayingExpansion.current
     
     val form_factor: FormFactor = NowPlayingPage.getFormFactor(player)
+    val current_song: Song? by player.status.song_state
     
     val wave_layers: List<WaveLayer> = remember {
         getDefaultOverlappingWavesLayers(7, 0.35f)
     }
+    
+    val default_background_wave_speed: Float by ThemeSettings.Key.NOWPLAYING_DEFAULT_WAVE_SPEED.rememberMutableState()
+    val default_background_wave_opacity: Float by ThemeSettings.Key.NOWPLAYING_DEFAULT_WAVE_OPACITY.rememberMutableState()
+
+    val background_wave_speed: Float = song.BackgroundWaveSpeed.observe(player.database).value ?: default_background_wave_speed
+    val background_wave_opacity: Float = song.BackgroundWaveOpacity.observe(player.database).value ?: default_background_wave_opacity
 
     val wave_height: Dp
     val wave_alpha: Float
@@ -39,14 +46,14 @@ fun NowPlayingOverlappingWaveBackground(modifier: Modifier = Modifier) {
     when (form_factor) {
         FormFactor.PORTRAIT -> {
             wave_height = player.screen_size.height * 0.5f
-            wave_alpha = 0.5f
-            speed = 0.15f
+            wave_alpha = 0.5f * background_wave_opacity
+            speed = 0.15f * background_wave_speed
             bottom_spacing = 0.dp
         }
         FormFactor.LANDSCAPE -> {
             wave_height = player.screen_size.height * 0.5f
-            wave_alpha = 1f
-            speed = 0.5f
+            wave_alpha = 1f * background_wave_opacity
+            speed = 0.5f * background_wave_speed
             bottom_spacing = NOW_PLAYING_LARGE_BOTTOM_BAR_HEIGHT
         }
     }
