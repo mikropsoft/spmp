@@ -98,7 +98,7 @@ private fun MainTabControls(
 }
 
 @Composable
-internal fun NowPlayingMainTabPage.NowPlayingMainTabLarge(page_height: Dp, top_bar: NowPlayingTopBar, content_padding: PaddingValues, modifier: Modifier = Modifier) {
+internal fun NowPlayingMainTabPage.NowPlayingMainTabLarge(page_size: DpSize, top_bar: NowPlayingTopBar, content_padding: PaddingValues, modifier: Modifier = Modifier) {
     val player: PlayerState = LocalPlayerState.current
     val expansion: NowPlayingExpansionState = LocalNowPlayingExpansion.current
     val layout_direction: LayoutDirection = LocalLayoutDirection.current
@@ -352,7 +352,7 @@ private fun PlayerQueueTab(
     getCurrentControlsHeight: () -> Dp,
     inner_bottom_padding: Dp,
     stroke_colour: Color,
-    page_height: Dp,
+    page_size: DpSize,
     modifier: Modifier = Modifier
 ) {
     val player: PlayerState = LocalPlayerState.current

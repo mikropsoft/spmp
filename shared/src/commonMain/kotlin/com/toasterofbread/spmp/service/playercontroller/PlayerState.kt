@@ -413,7 +413,8 @@ class PlayerState(val context: AppContext, internal val coroutine_scope: Corouti
         val density: Density = LocalDensity.current
         val bottom_padding: Int = density.getNpBottomPadding(WindowInsets.systemBars, WindowInsets.navigationBars, WindowInsets.ime)
 
-        val vertical_page_count: Int = getNowPlayingVerticalPageCount(player)
+        var form_factor: NowPlayingPage.FormFactor by remember { mutableStateOf(NowPlayingPage.FormFactor.PORTRAIT) }
+        val vertical_page_count: Int = getNowPlayingVerticalPageCount(player, form_factor)
         val minimised_now_playing_height: Dp = MINIMISED_NOW_PLAYING_HEIGHT_DP.dp
 
         LaunchedEffect(screen_size.height, bottom_padding, vertical_page_count) {
@@ -438,7 +439,10 @@ class PlayerState(val context: AppContext, internal val coroutine_scope: Corouti
             com.toasterofbread.spmp.ui.layout.nowplaying.NowPlaying(
                 np_swipe_state.value,
                 np_swipe_anchors!!,
-                content_padding = PaddingValues(start = WindowInsets.getStart(), end = WindowInsets.getEnd())
+                content_padding = PaddingValues(start = WindowInsets.getStart(), end = WindowInsets.getEnd()),
+                onFormFactorChanged = {
+                    form_factor = it
+                }
             )
         }
     }

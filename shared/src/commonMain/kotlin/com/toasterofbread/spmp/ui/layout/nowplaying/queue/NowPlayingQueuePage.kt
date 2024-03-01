@@ -14,7 +14,7 @@ class NowPlayingQueuePage: NowPlayingPage() {
         getFormFactor(player) == FormFactor.PORTRAIT
 
     @Composable
-    override fun Page(page_height: Dp, top_bar: NowPlayingTopBar, content_padding: PaddingValues, swipe_modifier: Modifier, modifier: Modifier) {
+    override fun Page(page_size: DpSize, top_bar: NowPlayingTopBar, content_padding: PaddingValues, swipe_modifier: Modifier, modifier: Modifier) {
         QueueTab(page_height, modifier, top_bar = top_bar, padding_modifier = swipe_modifier, content_padding = content_padding)
     }
 }

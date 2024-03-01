@@ -70,7 +70,7 @@ private fun BoxWithConstraintsScope.getThumbnailSize(): Dp {
 }
 
 @Composable
-internal fun NowPlayingMainTabPage.NowPlayingMainTabPortrait(page_height: Dp, top_bar: NowPlayingTopBar, content_padding: PaddingValues, modifier: Modifier = Modifier) {
+internal fun NowPlayingMainTabPage.NowPlayingMainTabPortrait(page_size: DpSize, top_bar: NowPlayingTopBar, content_padding: PaddingValues, modifier: Modifier = Modifier) {
     val player: PlayerState = LocalPlayerState.current
     val click_overrides: PlayerClickOverrides = LocalPlayerClickOverrides.current
     val expansion: NowPlayingExpansionState = LocalNowPlayingExpansion.current

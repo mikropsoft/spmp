@@ -13,7 +13,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
-import com.toasterofbread.spmp.platform.FormFactor
 import com.toasterofbread.spmp.service.playercontroller.PlayerState
 import com.toasterofbread.composekit.utils.composable.wave.OverlappingWaves
 import com.toasterofbread.composekit.utils.composable.wave.WaveLayer
@@ -25,7 +24,6 @@ fun NowPlayingOverlappingWaveBackground(modifier: Modifier = Modifier) {
     val player: PlayerState = LocalPlayerState.current
     val expansion: NowPlayingExpansionState = LocalNowPlayingExpansion.current
     
-    val form_factor: FormFactor = NowPlayingPage.getFormFactor(player)
     val current_song: Song? by player.status.song_state
     
     val wave_layers: List<WaveLayer> = remember {
@@ -43,32 +41,39 @@ fun NowPlayingOverlappingWaveBackground(modifier: Modifier = Modifier) {
     val speed: Float
     val bottom_spacing: Dp
 
-    when (form_factor) {
-        FormFactor.PORTRAIT -> {
-            wave_height = player.screen_size.height * 0.5f
-            wave_alpha = 0.5f * background_wave_opacity
-            speed = 0.15f * background_wave_speed
-            bottom_spacing = 0.dp
+    BoxWithConstraints(modifier) {
+        val form_factor: NowPlayingPage.FormFactor = NowPlayingPage.getFormFactor(player, maxSize)
+        
+        when (form_factor) {
+            NowPlayingPage.FormFactor.PORTRAIT, 
+            NowPlayingPage.FormFactor.NARROW_VERTICAL,
+            NowPlayingPage.FormFactor.NARROW_HORIZONTAL -> {
+                wave_height = player.screen_size.height * 0.5f
+                wave_alpha = 0.5f * background_wave_opacity
+                speed = 0.15f * background_wave_speed
+                bottom_spacing = 0.dp
+            }
+            NowPlayingPage.FormFactor.LANDSCAPE -> {
+                wave_height = player.screen_size.height * 0.5f
+                wave_alpha = 1f * background_wave_opacity
+                speed = 0.5f * background_wave_speed
+                bottom_spacing = NOW_PLAYING_LARGE_BOTTOM_BAR_HEIGHT
+            }
         }
-        FormFactor.LANDSCAPE -> {
-            wave_height = player.screen_size.height * 0.5f
-            wave_alpha = 1f * background_wave_opacity
-            speed = 0.5f * background_wave_speed
-            bottom_spacing = NOW_PLAYING_LARGE_BOTTOM_BAR_HEIGHT
-        }
-    }
 
-    OverlappingWaves(
-        { player.theme.accent.copy(alpha = wave_alpha) },
-        BlendMode.Screen,
-        modifier
-            .fillMaxWidth(1f)
-            .requiredHeight(wave_height)
-            .offset {
-                val queue_expansion: Float = expansion.get().coerceAtLeast(1f)
-                IntOffset(0, ((queue_expansion * player.screen_size.height) - bottom_spacing - wave_height).roundToPx())
-            },
-        layers = wave_layers,
-        speed = speed
-    )
+        OverlappingWaves(
+            { player.theme.accent.copy(alpha = wave_alpha) },
+            BlendMode.Screen,
+            Modifier
+                .fillMaxWidth(1f)
+                .requiredHeight(wave_height)
+                .offset {
+                    val queue_expansion: Float = expansion.get().coerceAtLeast(1f)
+                    IntOffset(0, ((queue_expansion * player.screen_size.height) - bottom_spacing - wave_height).roundToPx())
+                },
+            layers = wave_layers,
+            speed = speed
+        )
+    }
+x
 }

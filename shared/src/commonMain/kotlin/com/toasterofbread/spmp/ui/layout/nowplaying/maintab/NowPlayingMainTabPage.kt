@@ -93,7 +93,7 @@ class NowPlayingMainTabPage: NowPlayingPage() {
     }
 
     @Composable
-    override fun Page(page_height: Dp, top_bar: NowPlayingTopBar, content_padding: PaddingValues, swipe_modifier: Modifier, modifier: Modifier) {
+    override fun Page(page_size: DpSize, top_bar: NowPlayingTopBar, content_padding: PaddingValues, swipe_modifier: Modifier, modifier: Modifier) {
         player = LocalPlayerState.current
         val current_song: Song? by player.status.song_state
 
@@ -120,17 +120,11 @@ class NowPlayingMainTabPage: NowPlayingPage() {
         }
 
         BoxWithConstraints(modifier) {
-            if (maxWidth <= NARROW_PLAYER_MAX_SIZE_DP.dp) {
-                NowPlayingMainTabNarrow(page_height, top_bar, content_padding, true)
-            }
-            else if (maxHeight <= NARROW_PLAYER_MAX_SIZE_DP.dp) {
-                NowPlayingMainTabNarrow(page_height, top_bar, content_padding, false)
-            }
-            else {
-                when (getFormFactor(player)) {
-                    FormFactor.PORTRAIT -> NowPlayingMainTabPortrait(page_height, top_bar, content_padding)
-                    FormFactor.LANDSCAPE -> NowPlayingMainTabLarge(page_height, top_bar, content_padding)
-                }
+            when (getFormFactor(player, maxSize)) {
+                NowPlayingPage.FormFactor.PORTRAIT -> NowPlayingMainTabPortrait(page_height, top_bar, content_padding)
+                NowPlayingPage.FormFactor.LANDSCAPE -> NowPlayingMainTabLarge(page_height, top_bar, content_padding)
+                NowPlayingPage.FormFactor.NARROW_VERTICAL -> NowPlayingMainTabNarrow(page_height, top_bar, content_padding, true)
+                NowPlayingPage.FormFactor.NARROW_HORIZONTAL -> NowPlayingMainTabNarrow(page_height, top_bar, content_padding, false)
             }
         }
     }

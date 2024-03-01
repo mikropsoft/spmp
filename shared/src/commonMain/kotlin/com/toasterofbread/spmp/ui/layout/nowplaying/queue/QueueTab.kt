@@ -68,7 +68,7 @@ const val QUEUE_CORNER_RADIUS_DP: Float = 25f
 
 @Composable
 internal fun QueueTab(
-    page_height: Dp?,
+    page_size: DpSize?,
     modifier: Modifier = Modifier,
     top_bar: NowPlayingTopBar? = null,
     padding_modifier: Modifier = Modifier,

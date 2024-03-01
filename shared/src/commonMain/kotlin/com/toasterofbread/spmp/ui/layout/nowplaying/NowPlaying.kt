@@ -70,8 +70,8 @@ enum class ThemeMode {
     }
 }
 
-fun getNowPlayingVerticalPageCount(player: PlayerState): Int =
-    NowPlayingPage.ALL.count { it.shouldShow(player) }
+fun getNowPlayingVerticalPageCount(player: PlayerState, form_factor: FormFactor): Int =
+    NowPlayingPage.ALL.count { it.shouldShow(player, form_factor) }
 
 const val EXPANDED_THRESHOLD = 0.1f
 const val POSITION_UPDATE_INTERVAL_MS: Long = 100
@@ -146,7 +146,12 @@ internal fun PlayerState.getNPAltOnBackground(): Color =
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun NowPlaying(swipe_state: SwipeableState<Int>, swipe_anchors: Map<Float, Int>, content_padding: PaddingValues) {
+fun NowPlaying(
+    swipe_state: SwipeableState<Int>, 
+    swipe_anchors: Map<Float, Int>, 
+    content_padding: PaddingValues,
+    onFormFactorChanged: (NowPlayingPage.FormFactor) -> Unit
+) {
     val player: PlayerState = LocalPlayerState.current
     val expansion: NowPlayingExpansionState = LocalNowPlayingExpansion.current
     val density: Density = LocalDensity.current
@@ -181,7 +186,7 @@ fun NowPlaying(swipe_state: SwipeableState<Int>, swipe_anchors: Map<Float, Int>,
         val default_gradient_depth: Float by ThemeSettings.Key.NOWPLAYING_DEFAULT_GRADIENT_DEPTH.rememberMutableState()
 
         val half_screen_height: Dp = player.screen_size.height * 0.5f
-        val page_height: Dp = (
+        val page_size: DpSize = (
             player.screen_size.height
             - bottom_padding
             - WindowInsets.getTop()
@@ -266,67 +271,74 @@ fun NowPlaying(swipe_state: SwipeableState<Int>, swipe_anchors: Map<Float, Int>,
             )
         }
 
-        BoxWithConstraints(
-            modifier = Modifier
-                .fillMaxWidth()
-                .requiredHeight((player.screen_size.height * (getNowPlayingVerticalPageCount(player) + 1)))
-                .offset {
-                    IntOffset(
-                        0,
-                        with(density) {
-                            ((half_screen_height * getNowPlayingVerticalPageCount(player)) - swipe_state.offset.value.dp - bottom_padding).roundToPx()
-                        }
-                    )
-                }
-                .then(swipe_modifier)
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null
-                ) {
-                    if (is_shut) {
-                        coroutine_scope.launch {
-                            expansion.scrollTo(if (swipe_state.targetValue == 0) 1 else 0)
-                        }
-                    }
-                }
-                .graphicsLayer {
-                    alpha = player_alpha
-                }
-                .brushBackground {
-                    with(density) {
-                        val screen_height_px: Float = page_height.toPx()
-                        val v_offset: Float = (expansion.get() - 1f).coerceAtLeast(0f) * screen_height_px
+        BoxWithConstraints {
+            val form_factor: NowPlayingPage.FormFactor = NowPlayingPage.getFormFactor(player, maxSize)
+            LaunchedEffect(form_factor) {
+                onFormFactorChanged(form_factor)
+            }
 
-                        val gradient_depth: Float = 1f - (song_gradient_depth ?: default_gradient_depth)
-                        check(gradient_depth in 0f .. 1f)
-
-                        return@brushBackground Brush.verticalGradient(
-                            listOf(player.getNPBackground(), player.getNPAltBackground()),
-                            startY = v_offset + (page_height.toPx() * GRADIENT_TOP_START_RATIO),
-                            endY = v_offset - GRADIENT_BOTTOM_PADDING_DP.dp.toPx() + (
-                                screen_height_px * (1.2f + (gradient_depth * 2f))
-                            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .requiredHeight((player.screen_size.height * (getNowPlayingVerticalPageCount(player, form_factor) + 1)))
+                    .offset {
+                        IntOffset(
+                            0,
+                            with(density) {
+                                ((half_screen_height * getNowPlayingVerticalPageCount(player, form_factor)) - swipe_state.offset.value.dp - bottom_padding).roundToPx()
+                            }
                         )
                     }
+                    .then(swipe_modifier)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
+                        if (is_shut) {
+                            coroutine_scope.launch {
+                                expansion.scrollTo(if (swipe_state.targetValue == 0) 1 else 0)
+                            }
+                        }
+                    }
+                    .graphicsLayer {
+                        alpha = player_alpha
+                    }
+                    .brushBackground {
+                        with(density) {
+                            val screen_height_px: Float = page_height.toPx()
+                            val v_offset: Float = (expansion.get() - 1f).coerceAtLeast(0f) * screen_height_px
+
+                            val gradient_depth: Float = 1f - (song_gradient_depth ?: default_gradient_depth)
+                            check(gradient_depth in 0f .. 1f)
+
+                            return@brushBackground Brush.verticalGradient(
+                                listOf(player.getNPBackground(), player.getNPAltBackground()),
+                                startY = v_offset + (page_height.toPx() * GRADIENT_TOP_START_RATIO),
+                                endY = v_offset - GRADIENT_BOTTOM_PADDING_DP.dp.toPx() + (
+                                    screen_height_px * (1.2f + (gradient_depth * 2f))
+                                )
+                            )
+                        }
+                    }
+            ) {
+                if (ThemeSettings.Key.SHOW_EXPANDED_PLAYER_WAVE.rememberMutableState<Boolean>().value) {
+                    NowPlayingOverlappingWaveBackground(Modifier.align(Alignment.TopCenter).zIndex(1f))
                 }
-        ) {
-            if (ThemeSettings.Key.SHOW_EXPANDED_PLAYER_WAVE.rememberMutableState<Boolean>().value) {
-                NowPlayingOverlappingWaveBackground(Modifier.align(Alignment.TopCenter).zIndex(1f))
-            }
 
-            if (NowPlayingPage.getFormFactor(player) == FormFactor.LANDSCAPE) {
-                NowPlayingThumbnailBackground(Modifier.requiredSize(maxOf(player.screen_size.height, player.screen_size.width)))
-            }
-
-            BackHandler({ !is_shut }) {
-                coroutine_scope.launch {
-                    expansion.scroll(-1)
+                if (form_factor == NowPlayingPage.FormFactor.LANDSCAPE) {
+                    NowPlayingThumbnailBackground(Modifier.requiredSize(maxOf(player.screen_size.height, player.screen_size.width)))
                 }
-            }
 
-            CompositionLocalProvider(LocalContentColor provides player.getNPOnBackground()) {
-                Column(Modifier.fillMaxSize().zIndex(2f), horizontalAlignment = Alignment.CenterHorizontally) {
-                    NowPlayingCardContent(page_height, content_padding, swipe_modifier)
+                BackHandler({ !is_shut }) {
+                    coroutine_scope.launch {
+                        expansion.scroll(-1)
+                    }
+                }
+
+                CompositionLocalProvider(LocalContentColor provides player.getNPOnBackground()) {
+                    Column(Modifier.fillMaxSize().zIndex(2f), horizontalAlignment = Alignment.CenterHorizontally) {
+                        NowPlayingCardContent(page_height, content_padding, swipe_modifier)
+                    }
                 }
             }
         }
@@ -334,7 +346,7 @@ fun NowPlaying(swipe_state: SwipeableState<Int>, swipe_anchors: Map<Float, Int>,
 }
 
 @Composable
-private fun StatusBarColourHandler(page_height: Dp) {
+private fun StatusBarColourHandler(page_size: DpSize) {
     val player = LocalPlayerState.current
     val expansion = LocalNowPlayingExpansion.current
 
@@ -365,7 +377,7 @@ private fun StatusBarColourHandler(page_height: Dp) {
 }
 
 @Composable
-private fun NowPlayingCardContent(page_height: Dp, content_padding: PaddingValues, swipe_modifier: Modifier, modifier: Modifier = Modifier) {
+private fun NowPlayingCardContent(page_size: DpSize, content_padding: PaddingValues, swipe_modifier: Modifier, modifier: Modifier = Modifier) {
     val player: PlayerState = LocalPlayerState.current
     val click_overrides: PlayerClickOverrides = LocalPlayerClickOverrides.current
     val expansion: NowPlayingExpansionState = LocalNowPlayingExpansion.current

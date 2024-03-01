@@ -40,7 +40,7 @@ import com.toasterofbread.spmp.ui.layout.nowplaying.NowPlayingPage.Companion.top
 import com.toasterofbread.spmp.ui.layout.nowplaying.NowPlayingTopBar
 
 @Composable
-internal fun NowPlayingMainTabPage.NowPlayingMainTabNarrow(page_height: Dp, top_bar: NowPlayingTopBar, content_padding: PaddingValues, vertical: Boolean, modifier: Modifier = Modifier) {
+internal fun NowPlayingMainTabPage.NowPlayingMainTabNarrow(page_size: DpSize, top_bar: NowPlayingTopBar, content_padding: PaddingValues, vertical: Boolean, modifier: Modifier = Modifier) {
     val player: PlayerState = LocalPlayerState.current
     val song: Song? by player.status.song_state
 
