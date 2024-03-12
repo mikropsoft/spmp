@@ -601,8 +601,16 @@
     <string name="s_discord_status_enable">Enable</string>
     <string name="s_discord_status_disable">Disable</string>
 
-    <string name="s_group_desktop_system">System</string>
+    <string name="s_group_desktop_window">Window</string>
 
+    <string name="s_key_minimise_to_tray">Minimise to tray</string>
+    <string name="s_sub_minimise_to_tray">When the window is closed, SpMp will continue running in the background</string>
+    
+    <string name="s_key_undecorated_window">Undecorated window</string>
+    <string name="s_sub_undecorated_window">Disable external window decorations, such as title bars</string>
+    
+    <string name="s_group_desktop_system">System</string>
+    
     <string name="s_key_startup_command">Startup command</string>
     <string name="s_sub_startup_command">Command to be executed at program start</string>
 

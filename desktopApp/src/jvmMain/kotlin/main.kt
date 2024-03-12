@@ -29,6 +29,8 @@ import org.jetbrains.skiko.hostOs
 import java.awt.Toolkit
 import java.lang.reflect.Field
 
+
+
 @OptIn(ExperimentalComposeUiApi::class)
 fun main(args: Array<String>) {
     val coroutine_scope: CoroutineScope = CoroutineScope(Job())
@@ -61,9 +63,34 @@ fun main(args: Array<String>) {
         val text_field_focus_state: Any = getTextFieldFocusState()
         val pressed_shortcut_modifiers: MutableList<ShortcutModifier> = remember { mutableStateListOf() }
 
+        var show_window: Boolean by remember { mutableStateOf(true) }
+        val minimise_to_tray: Boolean by DesktopSettings.Key.MINIMISE_TO_TRAY.rememberMutableState()
+        val undecorated_window: Boolean by DesktopSettings.Key.UNDECORATED_WINDOW.rememberMutableState()
+
+        if (minimise_to_tray) {
+            AppTray(
+                context,
+                showApp = {
+                    show_window = true
+                }
+                closeApp = ::exitApplication
+            )
+        }
+
+        if (!show_window) {
+            return@application
+        }
+
         Window(
             title = SpMp.app_name,
-            onCloseRequest = ::exitApplication,
+            onCloseRequest = { 
+                if (minimise_to_tray) {
+                    show_window = false
+                }
+                else {
+                    exitApplication()
+                }
+            },
             onKeyEvent = { event ->
                 if (event.key == Key.CtrlLeft || event.key == Key.CtrlRight) {
                     if (event.type == KeyEventType.KeyDown) {
@@ -80,7 +107,7 @@ fun main(args: Array<String>) {
             state = rememberWindowState(
                 size = DpSize(1280.dp, 720.dp)
             ),
-            undecorated = enable_window_transparency,
+            undecorated = undecorated_window || enable_window_transparency,
             transparent = enable_window_transparency
         ) {
             LaunchedEffect(Unit) {

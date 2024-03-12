@@ -579,6 +579,14 @@
     <string name="s_discord_status_enable">有効にする</string>
     <string name="s_discord_status_disable">無効にする</string>
 
+    <string name="s_group_desktop_window">ウィンドウ</string>
+
+    <string name="s_key_minimise_to_tray">トレイに最小化する</string>
+    <string name="s_sub_minimise_to_tray">ウィンドウを閉じても、SpMpの実行がバックグラウンドで続きます</string>
+
+    <string name="s_key_undecorated_window">TODO</string>
+    <string name="s_sub_undecorated_window">TODO</string>
+
     <string name="s_group_desktop_system">システム</string>
 
     <string name="s_key_startup_command">開始コマンド</string>

@@ -14,6 +14,20 @@ import com.toasterofbread.spmp.ui.layout.apppage.mainpage.appTextField
 internal fun getDesktopCategoryItems(): List<SettingsItem> {
     return listOf(
         GroupSettingsItem(
+            getString("s_group_desktop_window")
+        ),
+
+        ToggleSettingsItem(
+            SettingsValueState(DesktopSettings.Key.MINIMISE_TO_TRAY.getName()),
+            getString("s_key_minimise_to_tray"), getString("s_sub_minimise_to_tray")
+        ),
+
+        ToggleSettingsItem(
+            SettingsValueState(DesktopSettings.Key.UNDECORATED_WINDOW.getName()),
+            getString("s_key_undecorated_window"), getString("s_sub_undecorated_window")
+        ),
+
+        GroupSettingsItem(
             getString("s_group_desktop_system")
         ),
 
